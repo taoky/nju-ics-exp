@@ -159,7 +159,7 @@ static int cmd_x(char *args) {
             return 0;
         }
         for (int i = 0; i < n; i++) {
-            printf("0x%x:\t0x%8x\n", esp, 
+            printf("0x%x:\t0x%08x\n", esp, 
                     vaddr_read(esp, 4));
             esp += 4;
         }
