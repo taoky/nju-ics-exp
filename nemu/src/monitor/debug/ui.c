@@ -108,7 +108,7 @@ static int cmd_info(char *args) {
     }
     else {
         if (strcmp(arg, "r") == 0) {
-            CPU_state cpu;
+            // CPU_state cpu;
             printf("eax\t0x%1$x\t%1$d\n"
                     "ecx\t0x%2$x\t%2$d\n"
                     "edx\t0x%3$x\t%3$d\n"
@@ -123,7 +123,7 @@ static int cmd_info(char *args) {
                     cpu.eip);
         }
         else {
-            TODO();
+            printf("Unsupported command '%s'\n", arg);
         }
     }
     return 0;
