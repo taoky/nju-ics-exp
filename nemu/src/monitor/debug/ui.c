@@ -40,6 +40,7 @@ static int cmd_help(char *args);
 
 static int cmd_si(char *args);
 static int cmd_info(char *args);
+static int cmd_x(char *args);
 
 static struct {
   char *name;
@@ -51,6 +52,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Instruction level single step", cmd_si },
   { "info", "Print program status", cmd_info },
+  { "x", "Read from the memory of the current target program", cmd_x },
 
   /* TODO: Add more commands */
 
@@ -124,6 +126,42 @@ static int cmd_info(char *args) {
         }
         else {
             printf("Unsupported command '%s'\n", arg);
+        }
+    }
+    return 0;
+}
+
+static int cmd_x(char *args) {
+    char *arg1 = strtok(NULL, " ");
+    char *arg2 = strtok(NULL, " ");
+    int n, esp;
+    
+    if (arg1 == NULL) {
+        printf("Missing subcommand 1\n");
+        return 0;
+    }
+    else {
+        n = atoi(arg1);
+        if (n <= 0) {
+            printf("The 1st argument should be a postive integer rather than '%s'\n", arg1);
+            return 0;
+        }
+    }
+    if (arg2 == NULL) {
+        printf("Missing subcommand 2\n");
+        return 0;
+    }
+    else {
+        // TODO: modify it to expr eval
+        esp = strtol(arg2, NULL, 16);
+        if (esp < 0 || esp >= (128 * 1024 * 1024)) {
+            printf("Wrong memory address!\n");
+            return 0;
+        }
+        for (int i = 0; i < n; i++) {
+            printf("0x%x:\t0x%x\n", esp, 
+                    vaddr_read(esp, 4));
+            esp += 4;
         }
     }
     return 0;
