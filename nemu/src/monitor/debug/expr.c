@@ -5,6 +5,7 @@
  */
 #include <sys/types.h>
 #include <regex.h>
+#include <ctype.h>
 
 enum {
   TK_NOTYPE = 256, TK_EQ, TK_NUM
@@ -118,14 +119,133 @@ static bool make_token(char *e) {
   return true;
 }
 
+static uint32_t eval(int p, int q, char *e, bool *success);
+
 uint32_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-
+  *success = true;
   /* TODO: Insert codes to evaluate the expression. */
   // TODO();
+  uint32_t res = eval(0, strlen(e) - 1, e, success);
 
-  return 0;
+  return res;
+}
+
+static bool check_parentheses(int p, int q, char *e) {
+    if (e[p] != '(' || e[q] != ')') return false;
+    int lp_cnt = 0;
+    for (int i = p; i <= q; i++) {
+        if (e[i] == '(') lp_cnt++;
+        else if (e[i] == ')') {
+            if (lp_cnt == 0) return false;
+            lp_cnt--;
+            if (i != q && lp_cnt == 0) return false;
+        }
+    }
+    if (lp_cnt != 0) return false;
+    return true;
+}
+
+static int priority_cmp(int x, int y, char *e) {
+    /*
+     * Compare two chars by priority.
+     * return 1: x > y
+     * return 0: x = y
+     * return -1: x < y
+     */
+
+    Assert(x == y && x == -1, "priority_cmp()'s x == y == -1");
+    if (x == -1) return -1;
+    else if (y == -1) return 1;
+    else {
+        int px = -1, py = -1;
+        if (e[x] == '+' || e[x] == '-')
+            px = 0;
+        else if (e[x] == '*' || e[x] == '/')
+            px = 1;
+        if (e[y] == '+' || e[y] == '-')
+            py = 0;
+        else if (e[y] == '*' || e[y] == '/')
+            py = 1;
+        Assert(x == -1, "priority_cmp() x wrong arg");
+        Assert(y == -1, "priority_cmp() y wrong arg");
+        return px > py;
+    }
+}
+
+static int find_main_op(int p, int q, char *e) {
+    int lp_cnt = 0;
+    int ret = -1;
+    for (int i = p; i <= q; i++) {
+        if (e[i] == '(')
+            lp_cnt++;
+        else if (e[i] == ')') {
+            if (lp_cnt == 0)
+                return -1;
+            lp_cnt--;
+        }
+        else if (e[i] == '+' || e[i] == '-' || e[i] == '*' || e[i] == '/') {
+            if (lp_cnt != 0)
+                continue;
+            if (priority_cmp(ret, i, e) != -1) {
+                ret = i;
+            }
+        }
+    }
+    Assert(ret == -1, "find_main_op() does not find the result.");
+    return ret;
+}
+
+static uint32_t eval(int p, int q, char *e, bool *success) {
+    if (p > q) {
+        *success = false;
+        return 0;
+    }
+    else if (p == q) {
+        if (isdigit(e[p]))
+        {
+            *success = true;
+            return e[p] - '0';
+        }
+        else {
+            *success = false;
+            return 0;
+        }
+    }
+    else if (check_parentheses(p, q, e) == true) {
+        return eval(p + 1, q - 1, e, success);
+    }
+    else {
+        int op = find_main_op(p, q, e);
+        if (op == -1) {
+            *success = false;
+            return 0;
+        }
+        uint32_t val1 = eval(p, op - 1, e, success);
+        if (!(*success))
+            return 0;
+        uint32_t val2 = eval(op + 1, q, e, success);
+        if (!(*success))
+            return 0;
+
+        switch (e[op]) {
+            case '+': 
+                return val1 + val2;
+            case '-':
+                return val1 - val2;
+            case '*':
+                return val1 * val2;
+            case '/':
+                if (val2 == 0) {
+                    printf("Divided by 0!\n");
+                    *success = false;
+                    return 0;
+                }
+                return val1 / val2;
+            default: assert(0);
+        }
+    }
 }
