@@ -168,8 +168,8 @@ static int priority_cmp(int x, int y) {
             py = 0;
         else if (tokens[y].type == '*' || tokens[y].type == '/')
             py = 1;
-        Assert(x != -1, "priority_cmp() x wrong arg");
-        Assert(y != -1, "priority_cmp() y wrong arg");
+        Assert(px != -1, "priority_cmp() x wrong arg");
+        Assert(py != -1, "priority_cmp() y wrong arg");
         return px > py;
     }
 }
