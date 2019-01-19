@@ -218,6 +218,7 @@ static uint32_t eval(int p, int q, bool *success) {
         return eval(p + 1, q - 1, success);
     }
     else {
+        Log("p: %d, q: %d", p, q);
         int op = find_main_op(p, q);
         if (op == -1) {
             *success = false;
