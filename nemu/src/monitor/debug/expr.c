@@ -207,7 +207,7 @@ static uint32_t eval(int p, int q, bool *success) {
         if (tokens[p].type == TK_NUM)
         {
             *success = true;
-            return (uint32_t)strtoul(tokens[p].str, NULL, 16);
+            return (uint32_t)strtoul(tokens[p].str, NULL, 10);
         }
         else {
             *success = false;
