@@ -128,7 +128,7 @@ uint32_t expr(char *e, bool *success) {
     return 0;
   }
   *success = true;
-  uint32_t res = eval(0, nr_token, success);
+  uint32_t res = eval(0, nr_token - 1, success);
 
   return res;
 }
