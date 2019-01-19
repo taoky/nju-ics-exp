@@ -7,7 +7,7 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ
+  TK_NOTYPE = 256, TK_EQ, TK_NUM
 
   /* TODO: Add more token types */
 
@@ -24,6 +24,12 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"-", '-'},           // minus
+  {"\\*", '*'},         // multiply
+  {"/", '/'},           // division
+  {"\\(", '('},         // left parenthesis
+  {"\\)", ')'},         // right parenthesis
+  {"\\d+", TK_NUM},     // number (digits)
   {"==", TK_EQ}         // equal
 };
 
@@ -78,8 +84,16 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-
+        Assert(nr_token >= 32, "tokens[32] array overflow");
         switch (rules[i].token_type) {
+          case TK_NOTYPE: break;
+          case '+': case '-': case '*': case '/': case '(': case ')':
+            tokens[nr_token++].type = rules[i].token_type;
+            break;
+          case TK_NUM:
+            tokens[nr_token].type = rules[i].token_type;
+            strncpy(tokens[nr_token++].str, substr_start, substr_len);
+            break;
           default: TODO();
         }
 
