@@ -41,6 +41,7 @@ static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
+static int cmd_p(char *args);
 
 static struct {
   char *name;
@@ -53,6 +54,7 @@ static struct {
   { "si", "Instruction level single step", cmd_si },
   { "info", "Print program status", cmd_info },
   { "x", "Read from the memory of the current target program", cmd_x },
+  { "p", "Print value of expression EXP", cmd_p }
 
   /* TODO: Add more commands */
 
@@ -163,6 +165,18 @@ static int cmd_x(char *args) {
                     vaddr_read(esp, 4));
             esp += 4;
         }
+    }
+    return 0;
+}
+
+static int cmd_p(char *args) {
+    bool success = false;
+    uint32_t res = expr(args, &success);
+    if (!success) {
+        printf("Syntax error in '%s'\n", args);
+    }
+    else {
+        printf("%u\n", res);
     }
     return 0;
 }

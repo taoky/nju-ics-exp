@@ -84,14 +84,22 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-        Assert(nr_token >= 32, "tokens[32] array overflow");
+        if (nr_token >= 32) {
+            printf("tokens[32] array overflow: too many tokens.\n");
+            return false;
+        }
         switch (rules[i].token_type) {
           case TK_NOTYPE: break;
           case '+': case '-': case '*': case '/': case '(': case ')':
-            tokens[nr_token++].type = rules[i].token_type;
+            tokens[nr_token].type = rules[i].token_type;
+            tokens[nr_token++].str[0] = '\0';
             break;
           case TK_NUM:
             tokens[nr_token].type = rules[i].token_type;
+            if (substr_len >= 32) {
+                printf("The length of the number is too long.\n");
+                return false;
+            }
             strncpy(tokens[nr_token++].str, substr_start, substr_len);
             break;
           default: TODO();
