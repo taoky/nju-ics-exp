@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <regex.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 enum {
   TK_NOTYPE = 256, TK_EQ, TK_NUM
@@ -119,7 +120,7 @@ static bool make_token(char *e) {
   return true;
 }
 
-static uint32_t eval(int p, int q, char *e, bool *success);
+static uint32_t eval(int p, int q, bool *success);
 
 uint32_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -127,19 +128,17 @@ uint32_t expr(char *e, bool *success) {
     return 0;
   }
   *success = true;
-  /* TODO: Insert codes to evaluate the expression. */
-  // TODO();
-  uint32_t res = eval(0, strlen(e) - 1, e, success);
+  uint32_t res = eval(0, nr_token, success);
 
   return res;
 }
 
-static bool check_parentheses(int p, int q, char *e) {
-    if (e[p] != '(' || e[q] != ')') return false;
+static bool check_parentheses(int p, int q) {
+    if (tokens[p].type != '(' || tokens[q].type != ')') return false;
     int lp_cnt = 0;
     for (int i = p; i <= q; i++) {
-        if (e[i] == '(') lp_cnt++;
-        else if (e[i] == ')') {
+        if (tokens[i].type == '(') lp_cnt++;
+        else if (tokens[i].type == ')') {
             if (lp_cnt == 0) return false;
             lp_cnt--;
             if (i != q && lp_cnt == 0) return false;
@@ -149,7 +148,7 @@ static bool check_parentheses(int p, int q, char *e) {
     return true;
 }
 
-static int priority_cmp(int x, int y, char *e) {
+static int priority_cmp(int x, int y) {
     /*
      * Compare two chars by priority.
      * return 1: x > y
@@ -162,13 +161,13 @@ static int priority_cmp(int x, int y, char *e) {
     else if (y == -1) return 1;
     else {
         int px = -1, py = -1;
-        if (e[x] == '+' || e[x] == '-')
+        if (tokens[x].type == '+' || tokens[x].type == '-')
             px = 0;
-        else if (e[x] == '*' || e[x] == '/')
+        else if (tokens[x].type == '*' || tokens[x].type == '/')
             px = 1;
-        if (e[y] == '+' || e[y] == '-')
+        if (tokens[y].type == '+' || tokens[y].type == '-')
             py = 0;
-        else if (e[y] == '*' || e[y] == '/')
+        else if (tokens[y].type == '*' || tokens[y].type == '/')
             py = 1;
         Assert(x == -1, "priority_cmp() x wrong arg");
         Assert(y == -1, "priority_cmp() y wrong arg");
@@ -176,21 +175,21 @@ static int priority_cmp(int x, int y, char *e) {
     }
 }
 
-static int find_main_op(int p, int q, char *e) {
+static int find_main_op(int p, int q) {
     int lp_cnt = 0;
     int ret = -1;
     for (int i = p; i <= q; i++) {
-        if (e[i] == '(')
+        if (tokens[i].type == '(')
             lp_cnt++;
-        else if (e[i] == ')') {
+        else if (tokens[i].type == ')') {
             if (lp_cnt == 0)
                 return -1;
             lp_cnt--;
         }
-        else if (e[i] == '+' || e[i] == '-' || e[i] == '*' || e[i] == '/') {
+        else if (tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == '*' || tokens[i].type == '/') {
             if (lp_cnt != 0)
                 continue;
-            if (priority_cmp(ret, i, e) != -1) {
+            if (priority_cmp(ret, i) != -1) {
                 ret = i;
             }
         }
@@ -199,39 +198,39 @@ static int find_main_op(int p, int q, char *e) {
     return ret;
 }
 
-static uint32_t eval(int p, int q, char *e, bool *success) {
+static uint32_t eval(int p, int q, bool *success) {
     if (p > q) {
         *success = false;
         return 0;
     }
     else if (p == q) {
-        if (isdigit(e[p]))
+        if (tokens[p].type == TK_NUM)
         {
             *success = true;
-            return e[p] - '0';
+            return (uint32_t)strtoul(tokens[p].str, NULL, 16);
         }
         else {
             *success = false;
             return 0;
         }
     }
-    else if (check_parentheses(p, q, e) == true) {
-        return eval(p + 1, q - 1, e, success);
+    else if (check_parentheses(p, q) == true) {
+        return eval(p + 1, q - 1, success);
     }
     else {
-        int op = find_main_op(p, q, e);
+        int op = find_main_op(p, q);
         if (op == -1) {
             *success = false;
             return 0;
         }
-        uint32_t val1 = eval(p, op - 1, e, success);
+        uint32_t val1 = eval(p, op - 1, success);
         if (!(*success))
             return 0;
-        uint32_t val2 = eval(op + 1, q, e, success);
+        uint32_t val2 = eval(op + 1, q, success);
         if (!(*success))
             return 0;
 
-        switch (e[op]) {
+        switch (tokens[op].type) {
             case '+': 
                 return val1 + val2;
             case '-':
