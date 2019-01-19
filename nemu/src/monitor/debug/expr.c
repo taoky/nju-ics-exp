@@ -155,7 +155,7 @@ static int priority_cmp(int x, int y) {
      * return 0: x = y
      * return -1: x < y
      */
-
+    Log("priority_cmp(), x=%d, y=%d", x, y);
     Assert(x == y && x == -1, "priority_cmp()'s x == y == -1");
     if (x == -1) return -1;
     else if (y == -1) return 1;
