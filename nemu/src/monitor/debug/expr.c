@@ -29,7 +29,7 @@ static struct rule {
   {"/", '/'},           // division
   {"\\(", '('},         // left parenthesis
   {"\\)", ')'},         // right parenthesis
-  {"\\d+", TK_NUM},     // number (digits)
+  {"\\\\d+", TK_NUM},     // number (digits)
   {"==", TK_EQ}         // equal
 };
 
