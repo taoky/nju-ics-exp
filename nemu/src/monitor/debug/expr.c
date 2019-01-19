@@ -230,7 +230,7 @@ static uint32_t eval(int p, int q, bool *success) {
         uint32_t val2 = eval(op + 1, q, success);
         if (!(*success))
             return 0;
-        Log("val1: %u, val2: %u", val1, val2);
+        Log("op: %d, val1: %u, val2: %u", op, val1, val2);
         switch (tokens[op].type) {
             case '+': 
                 return val1 + val2;
