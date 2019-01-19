@@ -155,7 +155,6 @@ static int priority_cmp(int x, int y) {
      * return 0: x = y
      * return -1: x < y
      */
-    Log("priority_cmp(), x=%d, y=%d", x, y);
     Assert(!(x == y && x == -1), "priority_cmp()'s x == y == -1");
     if (x == -1) return -1;
     else if (y == -1) return 1;
@@ -169,8 +168,8 @@ static int priority_cmp(int x, int y) {
             py = 0;
         else if (tokens[y].type == '*' || tokens[y].type == '/')
             py = 1;
-        Assert(x == -1, "priority_cmp() x wrong arg");
-        Assert(y == -1, "priority_cmp() y wrong arg");
+        Assert(x != -1, "priority_cmp() x wrong arg");
+        Assert(y != -1, "priority_cmp() y wrong arg");
         return px > py;
     }
 }
@@ -194,7 +193,7 @@ static int find_main_op(int p, int q) {
             }
         }
     }
-    Assert(ret == -1, "find_main_op() does not find the result.");
+    Assert(ret != -1, "find_main_op() does not find the result.");
     return ret;
 }
 
