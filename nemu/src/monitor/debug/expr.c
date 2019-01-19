@@ -156,8 +156,8 @@ static int priority_cmp(int x, int y) {
      * return -1: x < y
      */
     Assert(!(x == y && x == -1), "priority_cmp()'s x == y == -1");
-    if (x == -1) return -1;
-    else if (y == -1) return 1;
+    if (x == -1) return 1;
+    else if (y == -1) return -1;
     else {
         int px = -1, py = -1;
         if (tokens[x].type == '+' || tokens[x].type == '-')
@@ -182,7 +182,7 @@ static int find_main_op(int p, int q) {
             lp_cnt++;
         else if (tokens[i].type == ')') {
             if (lp_cnt == 0)
-                return -1;
+                ret = -1;
             lp_cnt--;
         }
         else if (tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == '*' || tokens[i].type == '/') {
@@ -193,7 +193,8 @@ static int find_main_op(int p, int q) {
             }
         }
     }
-    Assert(ret != -1, "find_main_op() does not find the result.");
+    if (ret == -1)
+        Log("find_main_op() failed");
     return ret;
 }
 
