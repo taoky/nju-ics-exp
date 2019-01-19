@@ -80,8 +80,20 @@ static int cmd_help(char *args) {
 }
 
 static int cmd_si(char *args) {
-    // char *arg = strtok(NULL, " ");
+    char *arg = strtok(NULL, " ");
+    int n;
     
+    if (arg == NULL) {
+        n = 1;
+    }
+    else {
+        n = atoi(arg);
+        if (n <= 0) {
+            printf("The 1st argument should be a postive integer rather than '%s'\n", arg);
+            return 0;
+        }
+    }
+    cpu_exec(n);
     return 0;
 }
 
