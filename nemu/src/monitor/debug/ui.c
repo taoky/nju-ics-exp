@@ -39,6 +39,7 @@ static int cmd_q(char *args) {
 static int cmd_help(char *args);
 
 static int cmd_si(char *args);
+static int cmd_info(char *args);
 
 static struct {
   char *name;
@@ -49,6 +50,7 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si", "Instruction level single step", cmd_si },
+  { "info", "Print program status", cmd_info },
 
   /* TODO: Add more commands */
 
@@ -94,6 +96,36 @@ static int cmd_si(char *args) {
         }
     }
     cpu_exec(n);
+    return 0;
+}
+
+static int cmd_info(char *args) {
+    char *arg = strtok(NULL, " ");
+
+    if (arg == NULL) {
+        printf("Missing subcommand.\nNow supports 'r'.\n");
+        return 0;
+    }
+    else {
+        if (strcmp(arg, "r") == 0) {
+            CPU_state cpu;
+            printf("eax\t0x%1$x\t%1$d\n"
+                    "ecx\t0x%2$x\t%2$d\n"
+                    "edx\t0x%3$x\t%3$d\n"
+                    "ebx\t0x%4$x\t%4$d\n"
+                    "esp\t0x%5$x\t%5$d\n"
+                    "ebp\t0x%6$x\t%6$d\n"
+                    "esi\t0x%7$x\t%7$d\n"
+                    "edi\t0x%8$x\t%8$d\n"
+                    "eip\t0x%9$x\t%9$d\n",
+                    cpu.eax, cpu.ecx, cpu.edx, cpu.ebx,
+                    cpu.esp, cpu.ebp, cpu.esi, cpu.edi,
+                    cpu.eip);
+        }
+        else {
+            TODO();
+        }
+    }
     return 0;
 }
 
