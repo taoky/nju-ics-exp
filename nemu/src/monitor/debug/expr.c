@@ -170,7 +170,9 @@ static int priority_cmp(int x, int y) {
             py = 1;
         Assert(px != -1, "priority_cmp() x wrong arg");
         Assert(py != -1, "priority_cmp() y wrong arg");
-        return px > py;
+        if (px > py) return 1;
+        else if (px == py) return 0;
+        else return -1;
     }
 }
 
