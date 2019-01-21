@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
               bool success;
               uint32_t expr_res = expr(buf, &success);
               Assert(success && res == expr_res, "failed at %s, expected %u, got %u, success %d", buf, res, expr_res, success);
+              Log("%s=%d success", buf, res);
           }
       }
   }
