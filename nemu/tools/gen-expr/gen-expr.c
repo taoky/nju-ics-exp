@@ -46,11 +46,19 @@ static inline void gen_rand_op() {
     buf[bufpos++] = x;
 }
 
+static inline void gen_rand_space() {
+    if (bufpos >= bufsize - 1) buf_enlarge();
+    switch (choose(4)) {
+        case 0: buf[bufpos++] = ' ';
+        default: break;
+    }
+}
+
 static inline void gen_rand_expr() {
   switch (choose(3)) {
-      case 0: gen_num(); break;
-      case 1: gen('('); gen_rand_expr(); gen(')'); break;
-      default: gen_rand_expr(); gen_rand_op(); gen_rand_expr(); break;
+      case 0: gen_rand_space(); gen_num(); gen_rand_space(); break;
+      case 1: gen('('); gen_rand_space(); gen_rand_expr(); gen_rand_space(); gen(')'); break;
+      default: gen_rand_expr(); gen_rand_space(); gen_rand_op(); gen_rand_space(); gen_rand_expr(); break;
   }
   buf[bufpos] = '\0';
 }

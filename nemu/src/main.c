@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
       else {
           uint32_t res;
           char buf[65536];
-          while (fscanf(test_file, "%u %s", &res, buf) == 2) {
+          while (fscanf(test_file, "%u %[^\n]", &res, buf) == 2) {
               bool success;
               uint32_t expr_res = expr(buf, &success);
               Assert(success && res == expr_res, "failed at %s, expected %u, got %u, success %d", buf, res, expr_res, success);
