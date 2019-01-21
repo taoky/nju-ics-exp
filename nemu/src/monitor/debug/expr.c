@@ -104,7 +104,8 @@ static bool make_token(char *e) {
                 printf("The length of the number is too long.\n");
                 return false;
             }
-            strncpy(tokens[nr_token++].str, substr_start, substr_len);
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token++].str[substr_len] = '\0';
             Log("Number token %d: %s", nr_token - 1, tokens[nr_token - 1].str);
             break;
           default: TODO();
