@@ -224,13 +224,15 @@ static uint32_t eval(int p, int q, bool *success) {
             *success = false;
             return 0;
         }
+        Log("op: %d", op);
         uint32_t val1 = eval(p, op - 1, success);
         if (!(*success))
             return 0;
+        Log("val1: %u", val1);
         uint32_t val2 = eval(op + 1, q, success);
         if (!(*success))
             return 0;
-        Log("op: %d, val1: %u, val2: %u", op, val1, val2);
+        Log("val2: %u", val2);
         switch (tokens[op].type) {
             case '+': 
                 return val1 + val2;
