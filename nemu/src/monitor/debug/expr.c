@@ -61,7 +61,9 @@ typedef struct token {
   char str[32];
 } Token;
 
-Token tokens[65536];
+#define TK_LENS 65536
+
+Token tokens[TK_LENS];
 int nr_token;
 
 static bool make_token(char *e) {
@@ -86,8 +88,8 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-        if (nr_token >= 32) {
-            printf("tokens[32] array overflow: too many tokens.\n");
+        if (nr_token >= TK_LENS) {
+            printf("tokens[%d] array overflow: too many tokens.\n", TK_LENS);
             return false;
         }
         switch (rules[i].token_type) {
