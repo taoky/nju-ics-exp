@@ -105,6 +105,7 @@ static bool make_token(char *e) {
                 return false;
             }
             strncpy(tokens[nr_token++].str, substr_start, substr_len);
+            Log("Number token %d: %s", nr_token - 1, tokens[nr_token - 1].str);
             break;
           default: TODO();
         }
