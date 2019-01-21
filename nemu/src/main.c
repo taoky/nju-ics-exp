@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     while (fscanf(test_file, "%u %s", &res, buf) == 2) {
         bool success;
         uint32_t expr_res = expr(buf, &success);
-        Assert(success && res == expr_res, "failed at %s, expected %u, got %u", buf, res, expr_res);
+        Assert(success && res == expr_res, "failed at %s, expected %u, got %u, success %d", buf, res, expr_res, success);
     }
   }
 
