@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_NUM
+  TK_NOTYPE = 256, TK_EQ, TK_DNUM, TK_HNUM, TK_REG, TK_DREF, TK_NEQ, TK_LAND
 
   /* TODO: Add more token types */
 
@@ -25,14 +25,18 @@ static struct rule {
    */
 
   {" +", TK_NOTYPE},    // spaces
+  {"0x[0-9a-f]+", TK_HNUM}, // hex number
+  {"[0-9]+", TK_DNUM},     // decimal number (digits)
+  {"\\$(eax|ecx|edx|ebx|esp|ebp|esi|edi|eip|ah|dh|ch|bh|ax|dx|cx|bx|bp|si|di|sp|al|dl|cl|bl)", TK_REG},        // registers
   {"\\+", '+'},         // plus
   {"-", '-'},           // minus
-  {"\\*", '*'},         // multiply
+  {"\\*", '*'},         // multiply or dereference
   {"/", '/'},           // division
   {"\\(", '('},         // left parenthesis
   {"\\)", ')'},         // right parenthesis
-  {"[0-9]+", TK_NUM},     // number (digits)
-  {"==", TK_EQ}         // equal
+  {"==", TK_EQ},        // equal
+  {"!=", TK_NEQ},       // not equal
+  {"&&", TK_LAND},      // conditional 'and'
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -73,7 +77,7 @@ static bool make_token(char *e) {
 
   nr_token = 0;
 
-  while (e[position] != '\0') {
+  while (e[position]  != '\0') {
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i ++) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
@@ -94,11 +98,11 @@ static bool make_token(char *e) {
         }
         switch (rules[i].token_type) {
           case TK_NOTYPE: break;
-          case '+': case '-': case '*': case '/': case '(': case ')':
+          case '+': case '-': case '*': case '/': case '(': case ')': case TK_EQ: case TK_NEQ: case TK_LAND:
             tokens[nr_token].type = rules[i].token_type;
             tokens[nr_token++].str[0] = '\0';
             break;
-          case TK_NUM:
+          case TK_DNUM: case TK_HNUM:
             tokens[nr_token].type = rules[i].token_type;
             if (substr_len >= 32) {
                 printf("The length of the number is too long.\n");
@@ -107,6 +111,12 @@ static bool make_token(char *e) {
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token++].str[substr_len] = '\0';
             Log("Number token %d: %s", nr_token - 1, tokens[nr_token - 1].str);
+            break;
+          case TK_REG:
+            tokens[nr_token].type = rules[i].token_type;
+            strncpy(tokens[nr_token].str, substr_start + 1, substr_len);
+            tokens[nr_token++].str[substr_len] = '\0';
+            Log("Reg token %d: %s", nr_token - 1, tokens[nr_token - 1].str);
             break;
           default: TODO();
         }
@@ -130,7 +140,13 @@ uint32_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
+  } 
+
+  for (int i = 0; i < nr_token; i++) {
+      if (tokens[i].type == '*' && (i == 0 || (tokens[i - 1].type != TK_DNUM && tokens[i - 1].type != TK_HNUM && tokens[i - 1].type != TK_REG)))
+          tokens[i].type = TK_DREF;
   }
+
   *success = true;
   uint32_t res = eval(0, nr_token - 1, success);
 
@@ -205,20 +221,76 @@ static int find_main_op(int p, int q) {
 }
 
 static uint32_t eval(int p, int q, bool *success) {
-    if (p > q) {
+    if (p > q) { 
         *success = false;
         return 0;
     }
     else if (p == q) {
-        if (tokens[p].type == TK_NUM)
+        if (tokens[p].type == TK_DNUM || tokens[p].type == TK_HNUM)
         {
             *success = true;
-            return (uint32_t)strtoul(tokens[p].str, NULL, 10);
+            return (uint32_t)strtoul(tokens[p].str, NULL, tokens[p].type == TK_DNUM ? 10 : 16);
+        } 
+        else if (tokens[p].type == TK_REG) {
+            *success = true;
+            if (strcmp(tokens[p].str, "eax") == 0)
+                return cpu.eax;
+            else if (strcmp(tokens[p].str, "edx") == 0)
+                return cpu.edx;
+            else if (strcmp(tokens[p].str, "ecx") == 0)
+                return cpu.ecx;
+            else if (strcmp(tokens[p].str, "ebx") == 0)
+                return cpu.ebx;
+            else if (strcmp(tokens[p].str, "ebp") == 0)
+                return cpu.ebp;
+            else if (strcmp(tokens[p].str, "esi") == 0)
+                return cpu.esi;
+            else if (strcmp(tokens[p].str, "edi") == 0)
+                return cpu.edi;
+            else if (strcmp(tokens[p].str, "esp") == 0)
+                return cpu.esp;
+            else if (strcmp(tokens[p].str, "ax") == 0)
+                return reg_w(R_AX);
+            else if (strcmp(tokens[p].str, "dx") == 0)
+                return reg_w(R_DX);
+            else if (strcmp(tokens[p].str, "cx") == 0)
+                return reg_w(R_CX);
+            else if (strcmp(tokens[p].str, "bx") == 0)
+                return reg_w(R_BX);
+            else if (strcmp(tokens[p].str, "bp") == 0)
+                return reg_w(R_BP);
+            else if (strcmp(tokens[p].str, "si") == 0)
+                return reg_w(R_SI);
+            else if (strcmp(tokens[p].str, "di") == 0)
+                return reg_w(R_DI);
+            else if (strcmp(tokens[p].str, "sp") == 0)
+                return reg_w(R_SP);
+            else if (strcmp(tokens[p].str, "al") == 0)
+                return reg_b(R_AL);
+            else if (strcmp(tokens[p].str, "dl") == 0)
+                return reg_b(R_DL);
+            else if (strcmp(tokens[p].str, "cl") == 0)
+                return reg_b(R_CL);
+            else if (strcmp(tokens[p].str, "bl") == 0)
+                return reg_b(R_BL);
+            else if (strcmp(tokens[p].str, "ah") == 0)
+                return reg_b(R_AH);
+            else if (strcmp(tokens[p].str, "dh") == 0)
+                return reg_b(R_DH);
+            else if (strcmp(tokens[p].str, "ch") == 0)
+                return reg_b(R_CH);
+            else if (strcmp(tokens[p].str, "bh") == 0)
+                return reg_b(R_BH);
+            else {
+                Log("Unrecognized reg name");
+                *success = false;
+                return 0;
+            }
         }
         else {
             *success = false;
             return 0;
-        }
+        } 
     }
     else if (check_parentheses(p, q) == true) {
         return eval(p + 1, q - 1, success);
