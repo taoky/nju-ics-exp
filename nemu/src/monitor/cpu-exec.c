@@ -52,7 +52,7 @@ void cpu_exec(uint64_t n) {
             else
                 printf("The exp %s changes!\n", head->exp);
             nemu_state = NEMU_STOP;
-            break;
+            return;
         }
         head = head->next;
     }
