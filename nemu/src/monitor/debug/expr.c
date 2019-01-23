@@ -9,7 +9,8 @@
 #include <stdlib.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_DNUM, TK_HNUM, TK_REG, TK_DREF, TK_NEQ, TK_LAND
+  TK_NOTYPE = 256, TK_EQ, TK_DNUM, TK_HNUM, TK_REG, TK_DREF, TK_NEQ, TK_LAND,
+  TK_GE, TK_LE,
 
   /* TODO: Add more token types */
 
@@ -34,9 +35,13 @@ static struct rule {
   {"/", '/'},           // division
   {"\\(", '('},         // left parenthesis
   {"\\)", ')'},         // right parenthesis
+  {">=", TK_GE},
+  {"<=", TK_LE},
+  {">", '>'},
+  {"<", '<'},
   {"==", TK_EQ},        // equal
   {"!=", TK_NEQ},       // not equal
-  {"&&", TK_LAND},      // conditional 'and'
+  {"&&", TK_LAND},      // logical 'and'
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -98,7 +103,7 @@ static bool make_token(char *e) {
         }
         switch (rules[i].token_type) {
           case TK_NOTYPE: break;
-          case '+': case '-': case '*': case '/': case '(': case ')': case TK_EQ: case TK_NEQ: case TK_LAND:
+          case '+': case '-': case '*': case '/': case '(': case ')': case TK_EQ: case TK_NEQ: case TK_LAND: case TK_GE: case TK_LE: case '<': case '>':
             tokens[nr_token].type = rules[i].token_type;
             tokens[nr_token++].str[0] = '\0';
             break;
@@ -175,21 +180,24 @@ static int priority_cmp(int x, int y) {
      * return 0: x = y
      * return -1: x < y
      */
+    // init priority array
+    static int priority[512] = {};
+    priority[TK_DREF] = 2;
+    priority['*'] = priority['/'] = 3;
+    priority['+'] = priority['-'] = 4;
+    priority['<'] = priority['>'] = priority[TK_LE] = priority[TK_GE] = 6;
+    priority[TK_EQ] = priority[TK_NEQ] = 7;
+    priority[TK_LAND] = 11;
+
     Assert(!(x == y && x == -1), "priority_cmp()'s x == y == -1");
     if (x == -1) return 1;
     else if (y == -1) return -1;
     else {
-        int px = -1, py = -1;
-        if (tokens[x].type == '+' || tokens[x].type == '-')
-            px = 0;
-        else if (tokens[x].type == '*' || tokens[x].type == '/')
-            px = 1;
-        if (tokens[y].type == '+' || tokens[y].type == '-')
-            py = 0;
-        else if (tokens[y].type == '*' || tokens[y].type == '/')
-            py = 1;
-        Assert(px != -1, "priority_cmp() x wrong arg");
-        Assert(py != -1, "priority_cmp() y wrong arg");
+        int px, py;
+        px = priority[tokens[x].type];
+        py = priority[tokens[y].type];
+        Assert(px != 0, "priority_cmp() x wrong arg");
+        Assert(py != 0, "priority_cmp() y wrong arg");
         if (px > py) return 1;
         else if (px == py) return 0;
         else return -1;
@@ -210,7 +218,7 @@ static int find_main_op(int p, int q) {
         else if (tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == '*' || tokens[i].type == '/') {
             if (lp_cnt != 0)
                 continue;
-            if (priority_cmp(ret, i) != -1) {
+            if (priority_cmp(ret, i) != -1) { // priority ret >= i
                 ret = i;
             }
         }
