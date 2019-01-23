@@ -173,7 +173,7 @@ static int cmd_p(char *args) {
     bool success = true;
     uint32_t res = expr(args, &success);
     if (!success) {
-        printf("Syntax error in '%s'\n", args);
+        printf("Error in '%s'\n", args);
     }
     else {
         printf("%u\n", res);
