@@ -312,29 +312,57 @@ static uint32_t eval(int p, int q, bool *success) {
             return 0;
         }
         Log("op: %d", op);
-        uint32_t val1 = eval(p, op - 1, success);
-        if (!(*success))
-            return 0;
-        Log("val1: %u", val1);
-        uint32_t val2 = eval(op + 1, q, success);
-        if (!(*success))
-            return 0;
-        Log("val2: %u", val2);
-        switch (tokens[op].type) {
-            case '+': 
-                return val1 + val2;
-            case '-':
-                return val1 - val2;
-            case '*':
-                return val1 * val2;
-            case '/':
-                if (val2 == 0) {
-                    printf("Divided by 0!\n");
-                    *success = false;
-                    return 0;
-                }
-                return val1 / val2;
-            default: Assert(0, "Unrecognized type %d", tokens[op].type);
+        if (op != TK_DREF) {
+            uint32_t val1 = eval(p, op - 1, success);
+            if (!(*success))
+                return 0;
+            Log("val1: %u", val1);
+            uint32_t val2 = eval(op + 1, q, success);
+            if (!(*success))
+                return 0;
+            Log("val2: %u", val2);
+            switch (tokens[op].type) {
+                case '+': 
+                    return val1 + val2;
+                case '-':
+                    return val1 - val2;
+                case '*':
+                    return val1 * val2;
+                case '/':
+                    if (val2 == 0) {
+                        printf("Divided by 0!\n");
+                        *success = false;
+                        return 0;
+                    }
+                    return val1 / val2;
+                case '<':
+                    return val1 < val2;
+                case '>':
+                    return val1 > val2;
+                case TK_LE:
+                    return val1 <= val2;
+                case TK_GE:
+                    return val1 >= val2;
+                case TK_LAND:
+                    return val1 && val2;
+                case TK_EQ:
+                    return val1 == val2;
+                case TK_NEQ:
+                    return val1 != val2;
+                default: Assert(0, "Unrecognized type %d", tokens[op].type);
+            }
+        }
+        else {
+            // TK_DREF
+            uint32_t val = eval(op + 1, q, success);
+            if (!(*success)) return 0;
+            Log("val: %u", val);
+            if (val < 0 || val >= (128 * 1024 * 1024)) {
+                Log("mem[%u] out of bound", val);
+                *success = false;
+                return 0;
+            }
+            return vaddr_read(val, sizeof(uint32_t));
         }
     }
 }
