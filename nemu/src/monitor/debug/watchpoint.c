@@ -23,7 +23,10 @@ void init_wp_pool() {
 WP* new_wp() {
   if (!free_) assert(0);
   WP* next_free = free_->next;
-  if (!head) head = free_;
+  if (!head) {
+      head = free_;
+      head->next = NULL;
+  }
   else {
     free_->next = head;
     head = free_;
