@@ -42,6 +42,8 @@ static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
 static int cmd_p(char *args);
+static int cmd_w(char *args);
+static int cmd_d(char *args);
 
 static struct {
   char *name;
@@ -54,7 +56,9 @@ static struct {
   { "si", "Instruction level single step", cmd_si },
   { "info", "Print program status", cmd_info },
   { "x", "Read from the memory of the current target program", cmd_x },
-  { "p", "Print value of expression EXP", cmd_p }
+  { "p", "Print value of expression EXP", cmd_p },
+  { "w", "Set a watchpoint for an expression", cmd_w },
+  { "d", "Delete a watchpoint", cmd_d },
 
   /* TODO: Add more commands */
 
@@ -126,6 +130,12 @@ static int cmd_info(char *args) {
                     cpu.esp, cpu.ebp, cpu.esi, cpu.edi,
                     cpu.eip);
         }
+        else if (strcmp(arg, "w") == 0) {
+            WP* head = wp_get_head();
+            for (int i = 0; head != NULL; i++, head = head->next) {
+                printf("Watchpoint %d %s=%u\n", i, head->exp, head->old_value);
+            }
+        }
         else {
             printf("Unsupported command '%s'\n", arg);
         }
@@ -178,6 +188,33 @@ static int cmd_p(char *args) {
     else {
         printf("%u\n", res);
     }
+    return 0;
+}
+
+static int cmd_w(char *args) {
+    bool success = true;
+    WP* wp = new_wp();
+    wp->exp = strdup(args);
+    wp->old_value = expr(args, &success);
+    if (!success) {
+        printf("Error in calculating the expression.\n");
+        free_wp(wp);
+    }
+    return 0;
+}
+
+static int cmd_d(char *args) {
+    WP* head = wp_get_head();
+    int num = atoi(args);
+    if (num >= 0 && num < 32) {
+        for (int i = 0; head != NULL; i++, head = head->next) {
+            if (i == num) {
+                free_wp(head);
+                return 0;
+            }
+        }
+    }
+    printf("Watchpoint id out of bound!\n");
     return 0;
 }
 
