@@ -49,8 +49,10 @@ void cpu_exec(uint64_t n) {
         if (!success || new_value != head->old_value) {
             if (!success)
                 printf("The exp %s failed!\n", head->exp);
-            else
+            else {
                 printf("The exp %s changes!\n", head->exp);
+                head->old_value = new_value;
+            }
             nemu_state = NEMU_STOP;
             return;
         }
