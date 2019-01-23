@@ -119,7 +119,7 @@ static bool make_token(char *e) {
             break;
           case TK_REG:
             tokens[nr_token].type = rules[i].token_type;
-            strncpy(tokens[nr_token].str, substr_start + 1, substr_len);
+            strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
             tokens[nr_token++].str[substr_len] = '\0';
             Log("Reg token %d: %s", nr_token - 1, tokens[nr_token - 1].str);
             break;
