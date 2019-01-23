@@ -333,7 +333,7 @@ static uint32_t eval(int p, int q, bool *success) {
                     return 0;
                 }
                 return val1 / val2;
-            default: assert(0);
+            default: Assert(0, "Unrecognized type %d", tokens[op].type);
         }
     }
 }
