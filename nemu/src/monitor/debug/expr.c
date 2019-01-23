@@ -354,6 +354,7 @@ static uint32_t eval(int p, int q, bool *success) {
         }
         else {
             // TK_DREF
+            Log("DREF");
             uint32_t val = eval(op + 1, q, success);
             if (!(*success)) return 0;
             Log("val: %u", val);
