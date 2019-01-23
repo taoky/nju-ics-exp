@@ -215,7 +215,7 @@ static int find_main_op(int p, int q) {
                 ret = -1;
             lp_cnt--;
         }
-        else if (tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == '*' || tokens[i].type == '/') {
+        else if (tokens[i].type != TK_DNUM && tokens[i].type != TK_HNUM && tokens[i].type != TK_REG) {
             if (lp_cnt != 0)
                 continue;
             if (priority_cmp(ret, i) != -1) { // priority ret >= i
