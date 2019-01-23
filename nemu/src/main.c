@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
   /* Initialize the monitor. */
   int is_batch_mode = init_monitor(argc, argv);
 
-  /* PA1 Phase 2 Test */
+  /* PA1 Phase 2 Test
   char x;
   printf("Run PA1 Phase2 test? (y/...)");
   x = getchar();
@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
               Log("%s=%d success", buf, res);
           }
       }
-  }
+  } */
+
   /* Receive commands from user. */
   ui_mainloop(is_batch_mode);
 
