@@ -36,10 +36,12 @@ void free_wp(WP *wp) {
   Assert(wp, "Function free_wp() receives NULL.");
   WP *p = head;
   if (wp->exp) {
-      free(wp->exp);
-      wp->exp = NULL;
+    free(wp->exp);
+    wp->exp = NULL;
   }
-  while (p->next != wp) p = p->next;
+  if (p != wp)
+    while (p->next != wp) 
+        p = p->next;
   p->next = wp->next;
   if (!free_) {
     free_ = wp;
