@@ -45,8 +45,8 @@ void free_wp(WP *wp) {
   if (p != wp)
     while (p->next != wp) 
         p = p->next;
-  else
-    p->next = NULL;
+  else // only one element inside
+    head = NULL;
   p->next = wp->next;
   if (!free_) {
     free_ = wp;
