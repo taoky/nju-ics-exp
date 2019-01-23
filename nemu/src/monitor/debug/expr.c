@@ -188,6 +188,7 @@ static int priority_cmp(int x, int y) {
     priority['<'] = priority['>'] = priority[TK_LE] = priority[TK_GE] = 6;
     priority[TK_EQ] = priority[TK_NEQ] = 7;
     priority[TK_LAND] = 11;
+    // larger, less priority
 
     Assert(!(x == y && x == -1), "priority_cmp()'s x == y == -1");
     if (x == -1) return 1;
@@ -218,7 +219,7 @@ static int find_main_op(int p, int q) {
         else if (tokens[i].type != TK_DNUM && tokens[i].type != TK_HNUM && tokens[i].type != TK_REG) {
             if (lp_cnt != 0)
                 continue;
-            if (priority_cmp(ret, i) != -1) { // priority ret >= i
+            if (priority_cmp(ret, i) != 1) { // priority ret <= i
                 ret = i;
             }
         }
