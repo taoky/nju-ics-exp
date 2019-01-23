@@ -33,6 +33,7 @@ WP* new_wp() {
 }
 
 void free_wp(WP *wp) {
+  Assert(wp, "Function free_wp() receives NULL.");
   WP *p = head;
   if (wp->exp) {
       free(wp->exp);
