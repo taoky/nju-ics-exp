@@ -191,8 +191,8 @@ static int priority_cmp(int x, int y) {
     // larger, less priority
 
     Assert(!(x == y && x == -1), "priority_cmp()'s x == y == -1");
-    if (x == -1) return 1;
-    else if (y == -1) return -1;
+    if (x == -1) return -1;
+    else if (y == -1) return 1;
     else {
         int px, py;
         px = priority[tokens[x].type];
