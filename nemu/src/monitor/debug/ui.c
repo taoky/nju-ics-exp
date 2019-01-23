@@ -193,6 +193,10 @@ static int cmd_p(char *args) {
 
 static int cmd_w(char *args) {
     bool success = true;
+    if (!args) {
+        printf("No expression inputed.\n");
+        return 0;
+    }
     WP* wp = new_wp();
     wp->exp = strdup(args);
     wp->old_value = expr(args, &success);
