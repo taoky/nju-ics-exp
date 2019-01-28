@@ -32,6 +32,30 @@ typedef struct {
   };
 
   vaddr_t eip;
+  struct {
+      uint16_t reserved0 : 10;
+      uint8_t id : 1;
+      uint8_t vip : 1;
+      uint8_t vif : 1;
+      uint8_t ac : 1;
+      uint8_t vm : 1;
+      uint8_t rf : 1;
+      uint8_t reserved1 : 1;
+      uint8_t nt : 1;
+      uint8_t iopl : 1;
+      uint8_t of : 1;
+      uint8_t df : 1;
+      uint8_t if_ : 1;
+      uint8_t tf : 1;
+      uint8_t sf : 1;
+      uint8_t zf : 1;
+      uint8_t reserved2 : 1;
+      uint8_t af : 1;
+      uint8_t reserved3 : 1;
+      uint8_t pf : 1;
+      uint8_t reserved4 : 1;
+      uint8_t cf : 1;
+  } eflags;
 
 } CPU_state;
 
