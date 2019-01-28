@@ -6,7 +6,12 @@ make_EHelper(mov) {
 }
 
 make_EHelper(push) {
-  TODO();
+  if (decoding.is_operand_size_16) {
+      TODO();
+  }
+  else {
+      rtl_push(&id_dest->val);
+  }
 
   print_asm_template1(push);
 }
