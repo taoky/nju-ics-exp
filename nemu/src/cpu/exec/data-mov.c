@@ -17,7 +17,12 @@ make_EHelper(push) {
 }
 
 make_EHelper(pop) {
-  TODO();
+  if (decoding.is_operand_size_16) {
+      TODO();
+  }
+  else {
+      rtl_pop(&id_dest->val);
+  }
 
   print_asm_template1(pop);
 }
