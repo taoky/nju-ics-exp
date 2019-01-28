@@ -40,6 +40,7 @@ make_EHelper(ret) {
   rtl_pop(&decoding.jmp_eip);
   Log("%u", decoding.jmp_eip);
   rtl_j(decoding.jmp_eip);
+  Log("ret (jmp) success");
   print_asm("ret");
 }
 
