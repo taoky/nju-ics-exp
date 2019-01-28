@@ -38,6 +38,7 @@ make_EHelper(ret) {
   if (decoding.is_operand_size_16 == true)
       TODO();
   rtl_pop(&decoding.jmp_eip);
+  Log("%u", decoding.jmp_eip);
   rtl_j(decoding.jmp_eip);
   print_asm("ret");
 }
