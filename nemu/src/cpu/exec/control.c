@@ -38,7 +38,7 @@ make_EHelper(ret) {
   if (decoding.is_operand_size_16 == true)
       TODO();
   rtl_pop(eip);
-
+  Log("%u", *eip);
   print_asm("ret");
 }
 
